@@ -16,7 +16,7 @@ import { LogTextColor } from "@spt-aki/models/spt/logging/LogTextColor";
 import { Keys, Locale } from "./Types/types";
 import { KeysUtils } from "./Utils/KeysUtils";
 
-class KeysInfo implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod 
+class BetterKeys implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod 
 {
     private mod: string;
     private modConfig = require("../config/config.json");
@@ -30,7 +30,7 @@ class KeysInfo implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
 
     constructor() 
     {
-        this.mod = "KeysInfo";
+        this.mod = "BetterKeys";
     }
 
     public preAkiLoad(container: DependencyContainer): void 
@@ -115,4 +115,4 @@ class KeysInfo implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
     }
 }
 
-module.exports = { mod: new KeysInfo() };
+module.exports = { mod: new BetterKeys() };
