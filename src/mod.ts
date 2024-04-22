@@ -20,7 +20,7 @@ class BetterKeys implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
 {
     private mod: string;
     private modConfig = require("../config/config.json");
-    private modPath = "user/mods/KeysInfo";
+    private modPath = "user/mods/BetterKeys";
     private modLoader: PreAkiModLoader;
     private logger: ILogger;
     private jsonUtil: JsonUtil;
