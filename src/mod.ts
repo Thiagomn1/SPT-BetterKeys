@@ -72,6 +72,7 @@ class BetterKeys implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
         {
             this.load(database, this._keys, map.name, map.key);
         });
+        this.loadJunk(database, this._keys);
         this.logger.logWithColor(`Finished loading: ${_package.name}-${_package.version}`, LogTextColor.GREEN);
     }
 
@@ -112,6 +113,19 @@ class BetterKeys implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
             }
         }
         this.logger.info(`Loaded: ${_package.name}-${mapID}`);
+    }
+
+    private loadJunk(database: IDatabaseTables, modDb): void
+    {
+        modDb.JunkKeys.forEach(keyID =>
+        {
+            if (database.templates.items[keyID]) 
+            {
+                console.log("@!@@@@!")
+                database.templates.items[keyID]._props.BackgroundColor = this.modConfig.BackgroundColor["JunkKeys"];
+            }
+        })
+
     }
 }
 
