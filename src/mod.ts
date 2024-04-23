@@ -121,7 +121,6 @@ class BetterKeys implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
         {
             if (database.templates.items[keyID]) 
             {
-                console.log("@!@@@@!")
                 database.templates.items[keyID]._props.BackgroundColor = this.modConfig.BackgroundColor["JunkKeys"];
             }
         })
