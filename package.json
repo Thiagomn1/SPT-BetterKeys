@@ -1,10 +1,10 @@
 {
     "name": "BetterKeys",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "main": "src/mod.js",
     "license": "MIT",
     "author": "FelYuuki",
-    "akiVersion": "~3.8",
+    "sptVersion": "~3.10",
     "loadBefore": [],
     "loadAfter": [],
     "incompatibilities": [],

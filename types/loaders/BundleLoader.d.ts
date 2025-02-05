@@ -1,21 +1,23 @@
-import { HttpServerHelper } from "@spt-aki/helpers/HttpServerHelper";
-import { BundleHashCacheService } from "@spt-aki/services/cache/BundleHashCacheService";
-import { JsonUtil } from "@spt-aki/utils/JsonUtil";
-import { VFS } from "@spt-aki/utils/VFS";
+import { HttpServerHelper } from "@spt/helpers/HttpServerHelper";
+import { BundleHashCacheService } from "@spt/services/cache/BundleHashCacheService";
+import { JsonUtil } from "@spt/utils/JsonUtil";
+import { VFS } from "@spt/utils/VFS";
+import { ICloner } from "@spt/utils/cloners/ICloner";
 export declare class BundleInfo {
     modpath: string;
     filename: string;
     crc: number;
     dependencies: string[];
-    constructor(modpath: string, bundle: BundleManifestEntry, bundleHash: number);
+    constructor(modpath: string, bundle: IBundleManifestEntry, bundleHash: number);
 }
 export declare class BundleLoader {
     protected httpServerHelper: HttpServerHelper;
     protected vfs: VFS;
     protected jsonUtil: JsonUtil;
     protected bundleHashCacheService: BundleHashCacheService;
+    protected cloner: ICloner;
     protected bundles: Record<string, BundleInfo>;
-    constructor(httpServerHelper: HttpServerHelper, vfs: VFS, jsonUtil: JsonUtil, bundleHashCacheService: BundleHashCacheService);
+    constructor(httpServerHelper: HttpServerHelper, vfs: VFS, jsonUtil: JsonUtil, bundleHashCacheService: BundleHashCacheService, cloner: ICloner);
     /**
      * Handle singleplayer/bundles
      */
@@ -24,10 +26,10 @@ export declare class BundleLoader {
     addBundles(modpath: string): void;
     addBundle(key: string, b: BundleInfo): void;
 }
-export interface BundleManifest {
-    manifest: BundleManifestEntry[];
+export interface IBundleManifest {
+    manifest: IBundleManifestEntry[];
 }
-export interface BundleManifestEntry {
+export interface IBundleManifestEntry {
     key: string;
     dependencyKeys: string[];
 }

@@ -1,4 +1,4 @@
-import { IDatabaseTables } from "@spt-aki/models/spt/server/IDatabaseTables";
+import { IDatabaseTables } from "@spt/models/spt/server/IDatabaseTables";
 import { Keys, Locale } from "src/Types/types";
 
 export class KeysUtils 

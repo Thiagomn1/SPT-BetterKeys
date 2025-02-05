@@ -1,27 +1,31 @@
-import { DialogueHelper } from "@spt-aki/helpers/DialogueHelper";
-import { ItemHelper } from "@spt-aki/helpers/ItemHelper";
-import { ProfileHelper } from "@spt-aki/helpers/ProfileHelper";
-import { TraderHelper } from "@spt-aki/helpers/TraderHelper";
-import { IPmcData } from "@spt-aki/models/eft/common/IPmcData";
-import { Item } from "@spt-aki/models/eft/common/tables/IItem";
-import { IGetInsuranceCostRequestData } from "@spt-aki/models/eft/insurance/IGetInsuranceCostRequestData";
-import { IGetInsuranceCostResponseData } from "@spt-aki/models/eft/insurance/IGetInsuranceCostResponseData";
-import { IInsureRequestData } from "@spt-aki/models/eft/insurance/IInsureRequestData";
-import { IItemEventRouterResponse } from "@spt-aki/models/eft/itemEvent/IItemEventRouterResponse";
-import { Insurance } from "@spt-aki/models/eft/profile/IAkiProfile";
-import { IInsuranceConfig } from "@spt-aki/models/spt/config/IInsuranceConfig";
-import { ILogger } from "@spt-aki/models/spt/utils/ILogger";
-import { EventOutputHolder } from "@spt-aki/routers/EventOutputHolder";
-import { ConfigServer } from "@spt-aki/servers/ConfigServer";
-import { DatabaseServer } from "@spt-aki/servers/DatabaseServer";
-import { SaveServer } from "@spt-aki/servers/SaveServer";
-import { InsuranceService } from "@spt-aki/services/InsuranceService";
-import { MailSendService } from "@spt-aki/services/MailSendService";
-import { PaymentService } from "@spt-aki/services/PaymentService";
-import { HashUtil } from "@spt-aki/utils/HashUtil";
-import { MathUtil } from "@spt-aki/utils/MathUtil";
-import { RandomUtil } from "@spt-aki/utils/RandomUtil";
-import { TimeUtil } from "@spt-aki/utils/TimeUtil";
+import { DialogueHelper } from "@spt/helpers/DialogueHelper";
+import { ItemHelper } from "@spt/helpers/ItemHelper";
+import { ProfileHelper } from "@spt/helpers/ProfileHelper";
+import { TraderHelper } from "@spt/helpers/TraderHelper";
+import { WeightedRandomHelper } from "@spt/helpers/WeightedRandomHelper";
+import { IPmcData } from "@spt/models/eft/common/IPmcData";
+import { IItem } from "@spt/models/eft/common/tables/IItem";
+import { IGetInsuranceCostRequestData } from "@spt/models/eft/insurance/IGetInsuranceCostRequestData";
+import { IGetInsuranceCostResponseData } from "@spt/models/eft/insurance/IGetInsuranceCostResponseData";
+import { IInsureRequestData } from "@spt/models/eft/insurance/IInsureRequestData";
+import { IItemEventRouterResponse } from "@spt/models/eft/itemEvent/IItemEventRouterResponse";
+import { IInsurance } from "@spt/models/eft/profile/ISptProfile";
+import { IInsuranceConfig } from "@spt/models/spt/config/IInsuranceConfig";
+import { ILogger } from "@spt/models/spt/utils/ILogger";
+import { EventOutputHolder } from "@spt/routers/EventOutputHolder";
+import { ConfigServer } from "@spt/servers/ConfigServer";
+import { SaveServer } from "@spt/servers/SaveServer";
+import { DatabaseService } from "@spt/services/DatabaseService";
+import { InsuranceService } from "@spt/services/InsuranceService";
+import { LocalisationService } from "@spt/services/LocalisationService";
+import { MailSendService } from "@spt/services/MailSendService";
+import { PaymentService } from "@spt/services/PaymentService";
+import { RagfairPriceService } from "@spt/services/RagfairPriceService";
+import { HashUtil } from "@spt/utils/HashUtil";
+import { MathUtil } from "@spt/utils/MathUtil";
+import { RandomUtil } from "@spt/utils/RandomUtil";
+import { TimeUtil } from "@spt/utils/TimeUtil";
+import { ICloner } from "@spt/utils/cloners/ICloner";
 export declare class InsuranceController {
     protected logger: ILogger;
     protected randomUtil: RandomUtil;
@@ -30,18 +34,21 @@ export declare class InsuranceController {
     protected eventOutputHolder: EventOutputHolder;
     protected timeUtil: TimeUtil;
     protected saveServer: SaveServer;
-    protected databaseServer: DatabaseServer;
+    protected databaseService: DatabaseService;
     protected itemHelper: ItemHelper;
     protected profileHelper: ProfileHelper;
     protected dialogueHelper: DialogueHelper;
+    protected weightedRandomHelper: WeightedRandomHelper;
     protected traderHelper: TraderHelper;
     protected paymentService: PaymentService;
     protected insuranceService: InsuranceService;
     protected mailSendService: MailSendService;
+    protected ragfairPriceService: RagfairPriceService;
+    protected localisationService: LocalisationService;
     protected configServer: ConfigServer;
+    protected cloner: ICloner;
     protected insuranceConfig: IInsuranceConfig;
-    protected roubleTpl: string;
-    constructor(logger: ILogger, randomUtil: RandomUtil, mathUtil: MathUtil, hashUtil: HashUtil, eventOutputHolder: EventOutputHolder, timeUtil: TimeUtil, saveServer: SaveServer, databaseServer: DatabaseServer, itemHelper: ItemHelper, profileHelper: ProfileHelper, dialogueHelper: DialogueHelper, traderHelper: TraderHelper, paymentService: PaymentService, insuranceService: InsuranceService, mailSendService: MailSendService, configServer: ConfigServer);
+    constructor(logger: ILogger, randomUtil: RandomUtil, mathUtil: MathUtil, hashUtil: HashUtil, eventOutputHolder: EventOutputHolder, timeUtil: TimeUtil, saveServer: SaveServer, databaseService: DatabaseService, itemHelper: ItemHelper, profileHelper: ProfileHelper, dialogueHelper: DialogueHelper, weightedRandomHelper: WeightedRandomHelper, traderHelper: TraderHelper, paymentService: PaymentService, insuranceService: InsuranceService, mailSendService: MailSendService, ragfairPriceService: RagfairPriceService, localisationService: LocalisationService, configServer: ConfigServer, cloner: ICloner);
     /**
      * Process insurance items of all profiles prior to being given back to the player through the mail service.
      *
@@ -61,7 +68,7 @@ export declare class InsuranceController {
      * @param time The time to check ready status against. Current time by default.
      * @returns All insured items that are ready to be processed.
      */
-    protected filterInsuredItems(sessionID: string, time?: number): Insurance[];
+    protected filterInsuredItems(sessionID: string, time?: number): IInsurance[];
     /**
      * This method orchestrates the processing of insured items in a profile.
      *
@@ -69,13 +76,13 @@ export declare class InsuranceController {
      * @param sessionID The session ID that should receive the processed items.
      * @returns void
      */
-    protected processInsuredItems(insuranceDetails: Insurance[], sessionID: string): void;
+    protected processInsuredItems(insuranceDetails: IInsurance[], sessionID: string): void;
     /**
      * Count all items in all insurance packages.
      * @param insurance
      * @returns
      */
-    protected countAllInsuranceItems(insurance: Insurance[]): number;
+    protected countAllInsuranceItems(insurance: IInsurance[]): number;
     /**
      * Remove an insurance package from a profile using the package's system data information.
      *
@@ -83,7 +90,7 @@ export declare class InsuranceController {
      * @param index The array index of the insurance package to remove.
      * @returns void
      */
-    protected removeInsurancePackageFromProfile(sessionID: string, insPackage: Insurance): void;
+    protected removeInsurancePackageFromProfile(sessionID: string, insPackage: IInsurance): void;
     /**
      * Finds the items that should be deleted based on the given Insurance object.
      *
@@ -91,7 +98,7 @@ export declare class InsuranceController {
      * @param insured - The insurance object containing the items to evaluate for deletion.
      * @returns A Set containing the IDs of items that should be deleted.
      */
-    protected findItemsToDelete(rootItemParentID: string, insured: Insurance): Set<string>;
+    protected findItemsToDelete(rootItemParentID: string, insured: IInsurance): Set<string>;
     /**
      * Initialize a Map object that holds main-parents to all of their attachments. Note that "main-parent" in this
      * context refers to the parent item that an attachment is attached to. For example, a suppressor attached to a gun,
@@ -102,7 +109,7 @@ export declare class InsuranceController {
      * @param itemsMap - A Map object for quick item look-up by item ID.
      * @returns A Map object containing parent item IDs to arrays of their attachment items.
      */
-    protected populateParentAttachmentsMap(rootItemParentID: string, insured: Insurance, itemsMap: Map<string, Item>): Map<string, Item[]>;
+    protected populateParentAttachmentsMap(rootItemParentID: string, insured: IInsurance, itemsMap: Map<string, IItem>): Map<string, IItem[]>;
     /**
      * Remove attachments that can not be moddable in-raid from the parentAttachmentsMap. If no moddable attachments
      * remain, the parent is removed from the map as well.
@@ -111,7 +118,7 @@ export declare class InsuranceController {
      * @param itemsMap - A Map object for quick item look-up by item ID.
      * @returns A Map object containing parent item IDs to arrays of their attachment items which are not moddable in-raid.
      */
-    protected removeNonModdableAttachments(parentAttachmentsMap: Map<string, Item[]>, itemsMap: Map<string, Item>): Map<string, Item[]>;
+    protected removeNonModdableAttachments(parentAttachmentsMap: Map<string, IItem[]>, itemsMap: Map<string, IItem>): Map<string, IItem[]>;
     /**
      * Process "regular" insurance items. Any insured item that is not an attached, attachment is considered a "regular"
      * item. This method iterates over them, preforming item deletion rolls to see if they should be deleted. If so,
@@ -122,7 +129,7 @@ export declare class InsuranceController {
      * @param parentAttachmentsMap A Map object containing parent item IDs to arrays of their attachment items.
      * @returns void
      */
-    protected processRegularItems(insured: Insurance, toDelete: Set<string>, parentAttachmentsMap: Map<string, Item[]>): void;
+    protected processRegularItems(insured: IInsurance, toDelete: Set<string>, parentAttachmentsMap: Map<string, IItem[]>): void;
     /**
      * Process parent items and their attachments, updating the toDelete Set accordingly.
      *
@@ -131,7 +138,7 @@ export declare class InsuranceController {
      * @param traderId The trader ID from the Insurance object.
      * @param toDelete A Set object to keep track of items marked for deletion.
      */
-    protected processAttachments(mainParentToAttachmentsMap: Map<string, Item[]>, itemsMap: Map<string, Item>, traderId: string, toDelete: Set<string>): void;
+    protected processAttachments(mainParentToAttachmentsMap: Map<string, IItem[]>, itemsMap: Map<string, IItem>, traderId: string, toDelete: Set<string>): void;
     /**
      * Takes an array of attachment items that belong to the same main-parent item, sorts them in descending order by
      * their maximum price. For each attachment, a roll is made to determine if a deletion should be made. Once the
@@ -143,36 +150,16 @@ export declare class InsuranceController {
      * @param toDelete The array that accumulates the IDs of the items to be deleted.
      * @returns void
      */
-    protected processAttachmentByParent(attachments: Item[], traderId: string, toDelete: Set<string>): void;
+    protected processAttachmentByParent(attachments: IItem[], traderId: string, toDelete: Set<string>): void;
+    protected logAttachmentsBeingRemoved(attachmentIdsToRemove: string[], attachments: IItem[], attachmentPrices: Record<string, number>): void;
+    protected weightAttachmentsByPrice(attachments: IItem[]): Record<string, number>;
     /**
-     * Sorts the attachment items by their max price in descending order.
-     *
-     * @param attachments The array of attachments items.
-     * @returns An array of items enriched with their max price and common locale-name.
+     * Get count of items to remove from weapon (take into account trader + price of attachment)
+     * @param weightedAttachmentByPrice Dict of item Tpls and thier rouble price
+     * @param traderId Trader attachment insured against
+     * @returns Attachment count to remove
      */
-    protected sortAttachmentsByPrice(attachments: Item[]): EnrichedItem[];
-    /**
-     * Logs the details of each attachment item.
-     *
-     * @param attachments The array of attachment items.
-     */
-    protected logAttachmentsDetails(attachments: EnrichedItem[]): void;
-    /**
-     * Counts the number of successful rolls for the attachment items.
-     *
-     * @param attachments The array of attachment items.
-     * @param traderId The ID of the trader that has insured these attachments.
-     * @returns The number of successful rolls.
-     */
-    protected countSuccessfulRolls(attachments: Item[], traderId: string): number;
-    /**
-     * Marks the most valuable attachments for deletion based on the number of successful rolls made.
-     *
-     * @param attachments The array of attachment items.
-     * @param successfulRolls The number of successful rolls.
-     * @param toDelete The array that accumulates the IDs of the items to be deleted.
-     */
-    protected attachmentDeletionByValue(attachments: EnrichedItem[], successfulRolls: number, toDelete: Set<string>): void;
+    protected getAttachmentCountToRemove(weightedAttachmentByPrice: Record<string, number>, traderId: string): number;
     /**
      * Remove items from the insured items that should not be returned to the player.
      *
@@ -180,7 +167,7 @@ export declare class InsuranceController {
      * @param toDelete The items that should be deleted.
      * @returns void
      */
-    protected removeItemsFromInsurance(insured: Insurance, toDelete: Set<string>): void;
+    protected removeItemsFromInsurance(insured: IInsurance, toDelete: Set<string>): void;
     /**
      * Handle sending the insurance message to the user that potentially contains the valid insurance items.
      *
@@ -188,16 +175,21 @@ export declare class InsuranceController {
      * @param insurance The context of insurance to use.
      * @returns void
      */
-    protected sendMail(sessionID: string, insurance: Insurance): void;
+    protected sendMail(sessionID: string, insurance: IInsurance): void;
+    protected IsMapLabsAndInsuranceDisabled(insurance: IInsurance, labsId?: string): boolean;
     /**
-     * Determines whether a insured item should be removed from the player's inventory based on a random roll and
+     * Update IInsurance object with new messageTemplateId and wipe out items array data
+     */
+    protected handleLabsInsurance(traderDialogMessages: Record<string, string[]>, insurance: IInsurance): void;
+    /**
+     * Determines whether an insured item should be removed from the player's inventory based on a random roll and
      * trader-specific return chance.
      *
      * @param traderId The ID of the trader who insured the item.
      * @param insuredItem Optional. The item to roll for. Only used for logging.
-     * @returns true if the insured item should be removed from inventory, false otherwise, or null on error.
+     * @returns true if the insured item should be removed from inventory, false otherwise, or undefined on error.
      */
-    protected rollForDelete(traderId: string, insuredItem?: Item): boolean | null;
+    protected rollForDelete(traderId: string, insuredItem?: IItem): boolean | undefined;
     /**
      * Handle Insure event
      * Add insurance to an item
@@ -209,6 +201,14 @@ export declare class InsuranceController {
      */
     insure(pmcData: IPmcData, body: IInsureRequestData, sessionID: string): IItemEventRouterResponse;
     /**
+     *  Insure softinserts of Armor that has softinsert slots
+     * Allows armors to come back after being lost correctly
+     * @param item Armor item to be insured
+     * @param pmcData Player profile
+     * @param body Insurance request data
+     */
+    insureSoftInserts(item: IItem, pmcData: IPmcData, body: IInsureRequestData): void;
+    /**
      * Handle client/insurance/items/list/cost
      * Calculate insurance cost
      *
@@ -218,8 +218,3 @@ export declare class InsuranceController {
      */
     cost(request: IGetInsuranceCostRequestData, sessionID: string): IGetInsuranceCostResponseData;
 }
-interface EnrichedItem extends Item {
-    name: string;
-    maxPrice: number;
-}
-export {};

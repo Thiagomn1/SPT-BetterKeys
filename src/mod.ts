@@ -2,26 +2,26 @@ import _package from "../package.json";
 
 import { DependencyContainer } from "tsyringe";
 
-import { IPreAkiLoadMod } from "@spt-aki/models/external/IPreAkiLoadMod";
-import { PreAkiModLoader } from "@spt-aki/loaders/PreAkiModLoader";
-import { IPostAkiLoadMod } from "@spt-aki/models/external/IPostAkiLoadMod";
-import { IPostDBLoadMod } from "@spt-aki/models/external/IPostDBLoadMod";
-import { DatabaseServer } from "@spt-aki/servers/DatabaseServer";
-import { IDatabaseTables } from "@spt-aki/models/spt/server/IDatabaseTables";
-import { ILogger } from "@spt-aki/models/spt/utils/ILogger";
-import { VFS } from "@spt-aki/utils/VFS";
-import { JsonUtil } from "@spt-aki/utils/JsonUtil";
-import { LogTextColor } from "@spt-aki/models/spt/logging/LogTextColor";
+import { IPreSptLoadMod } from "@spt/models/external/IPreSptLoadMod";
+import { PreSptModLoader } from "@spt/loaders/PreSptModLoader";
+import { IPostSptLoadMod } from "@spt/models/external/IPostSptLoadMod";
+import { IPostDBLoadMod } from "@spt/models/external/IPostDBLoadMod";
+import { DatabaseServer } from "@spt/servers/DatabaseServer";
+import { IDatabaseTables } from "@spt/models/spt/server/IDatabaseTables";
+import { ILogger } from "@spt/models/spt/utils/ILogger";
+import { VFS } from "@spt/utils/VFS";
+import { JsonUtil } from "@spt/utils/JsonUtil";
+import { LogTextColor } from "@spt/models/spt/logging/LogTextColor";
 
 import { Keys, Locale } from "./Types/types";
 import { KeysUtils } from "./Utils/KeysUtils";
 
-class BetterKeys implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod 
+class BetterKeys implements IPreSptLoadMod, IPostDBLoadMod, IPostSptLoadMod 
 {
     private mod: string;
     private modConfig = require("../config/config.json");
     private modPath = "user/mods/BetterKeys";
-    private modLoader: PreAkiModLoader;
+    private modLoader: PreSptModLoader;
     private logger: ILogger;
     private jsonUtil: JsonUtil;
     private _keys;
@@ -33,15 +33,15 @@ class BetterKeys implements IPreAkiLoadMod, IPostDBLoadMod, IPostAkiLoadMod
         this.mod = "BetterKeys";
     }
 
-    public preAkiLoad(container: DependencyContainer): void 
+    public preSptLoad(container: DependencyContainer): void 
     {
         this.logger = container.resolve<ILogger>("WinstonLogger");
         this.jsonUtil = container.resolve<JsonUtil>("JsonUtil");
     }
 
-    public postAkiLoad(container: DependencyContainer): void 
+    public postSptLoad(container: DependencyContainer): void 
     {
-        this.modLoader = container.resolve<PreAkiModLoader>("PreAkiModLoader");
+        this.modLoader = container.resolve<PreSptModLoader>("PreSptModLoader");
     }
 
     public postDBLoad(container: DependencyContainer): void 

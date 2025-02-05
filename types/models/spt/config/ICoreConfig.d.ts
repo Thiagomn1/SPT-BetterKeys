@@ -1,20 +1,25 @@
-import { IBaseConfig } from "@spt-aki/models/spt/config/IBaseConfig";
+import { ISurveyResponseData } from "@spt/models/eft/game/ISurveyResponseData";
+import { IBaseConfig } from "@spt/models/spt/config/IBaseConfig";
 export interface ICoreConfig extends IBaseConfig {
-    kind: "aki-core";
-    akiVersion: string;
+    kind: "spt-core";
+    sptVersion: string;
     projectName: string;
     compatibleTarkovVersion: string;
     serverName: string;
     profileSaveIntervalSeconds: number;
     sptFriendNickname: string;
+    allowProfileWipe: boolean;
     bsgLogging: IBsgLogging;
     release: IRelease;
     fixes: IGameFixes;
+    survey: ISurveyResponseData;
     features: IServerFeatures;
     /** Commit hash build server was created from */
     commit?: string;
     /** Timestamp of server build */
     buildTime?: string;
+    /** Server locale keys that will be added to the bottom of the startup watermark */
+    customWatermarkLocaleKeys?: string[];
 }
 export interface IBsgLogging {
     /**
@@ -50,8 +55,10 @@ export interface IRelease {
 export interface IGameFixes {
     /** Shotguns use a different value than normal guns causing huge pellet dispersion  */
     fixShotgunDispersion: boolean;
-    /** Remove items added by mods when the mod no longer exists - can fix dead profiles stuck at game load*/
+    /** Remove items added by mods when the mod no longer exists - can fix dead profiles stuck at game load */
     removeModItemsFromProfile: boolean;
+    /** Remove invalid traders from profile - trader data can be leftover when player removes trader mod */
+    removeInvalidTradersFromProfile: boolean;
     /** Fix issues that cause the game to not start due to inventory item issues */
     fixProfileBreakingInventoryItemIssues: boolean;
 }
@@ -59,11 +66,16 @@ export interface IServerFeatures {
     autoInstallModDependencies: boolean;
     compressProfile: boolean;
     chatbotFeatures: IChatbotFeatures;
+    /** Keyed to profile type e.g. "Standard" or "SPT Developer" */
+    createNewProfileTypesBlacklist: string[];
 }
 export interface IChatbotFeatures {
     sptFriendEnabled: boolean;
+    sptFriendGiftsEnabled: boolean;
     commandoEnabled: boolean;
     commandoFeatures: ICommandoFeatures;
+    commandUseLimits: Record<string, number>;
+    ids: Record<string, string>;
 }
 export interface ICommandoFeatures {
     giveCommandEnabled: boolean;
