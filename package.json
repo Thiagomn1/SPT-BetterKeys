@@ -1,6 +1,6 @@
 {
-    "name": "EditDatabase",
-    "version": "1.0.0",
+    "name": "SPT-BetterKeys",
+    "version": "1.1.0",
     "sptVersion": "~3.11",
     "loadBefore": [],
     "loadAfter": [],
@@ -24,7 +24,7 @@
         "typescript": "5.8",
         "winston": "3.12"
     },
-    "author": "Chomp",
+    "author": "FelYuuki",
     "contributors": [],
     "license": "MIT"
 }
