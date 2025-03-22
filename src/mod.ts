@@ -50,10 +50,10 @@ class BetterKeys implements IPreSptLoadMod, IPostDBLoadMod, IPostSptLoadMod
         const database = container.resolve<DatabaseServer>("DatabaseServer").getTables();
         this._keys = this.jsonUtil.deserialize(fileSystem.read(`${this.modPath}/db/_keys.json`));
 
-        this.loadDatabase(database);
+        this.loadDatabase(database, container);
     }
 
-    public loadDatabase(database: IDatabaseTables): void 
+    public loadDatabase(database: IDatabaseTables, container: DependencyContainer): void 
     {
         const maps = [
             {name: "bigmap", key: "56f40101d2720b2a4d8b45d6"}, 
@@ -70,15 +70,15 @@ class BetterKeys implements IPreSptLoadMod, IPostDBLoadMod, IPostSptLoadMod
 
         maps.forEach(map => 
         {
-            this.load(database, this._keys, map.name, map.key);
+            this.load(database, this._keys, map.name, map.key, container);
         });
         this.loadJunk(database, this._keys);
         this.logger.logWithColor(`Finished loading: ${_package.name}-${_package.version}`, LogTextColor.GREEN);
     }
 
-    private load(database: IDatabaseTables, modDb, mapID: string, mapKey: string): void 
+    private load(database: IDatabaseTables, modDb, mapID: string, mapKey: string, container: DependencyContainer): void 
     {
-        const fileSystem = this.container.resolve<FileSystemSync>("FileSystemSync");
+        const fileSystem = container.resolve<FileSystemSync>("FileSystemSync");
         const keyDb: Keys = this.jsonUtil.deserialize(fileSystem.read(`${this.modPath}/db/${mapID}.json`));
 
         for (const keyID in keyDb.Keys) 
