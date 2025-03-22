@@ -9,7 +9,7 @@ import { IPostDBLoadMod } from "@spt/models/external/IPostDBLoadMod";
 import { DatabaseServer } from "@spt/servers/DatabaseServer";
 import { IDatabaseTables } from "@spt/models/spt/server/IDatabaseTables";
 import { ILogger } from "@spt/models/spt/utils/ILogger";
-import { VFS } from "@spt/utils/VFS";
+import { FileSystemSync } from "@spt/utils/FileSystemSync";
 import { JsonUtil } from "@spt/utils/JsonUtil";
 import { LogTextColor } from "@spt/models/spt/logging/LogTextColor";
 
@@ -25,8 +25,8 @@ class BetterKeys implements IPreSptLoadMod, IPostDBLoadMod, IPostSptLoadMod
     private logger: ILogger;
     private jsonUtil: JsonUtil;
     private _keys;
-    private vfs: VFS;
     private keysUtils = new KeysUtils();
+    private container: DependencyContainer;
 
     constructor() 
     {
@@ -46,9 +46,9 @@ class BetterKeys implements IPreSptLoadMod, IPostDBLoadMod, IPostSptLoadMod
 
     public postDBLoad(container: DependencyContainer): void 
     {
+        const fileSystem = container.resolve<FileSystemSync>("FileSystemSync");
         const database = container.resolve<DatabaseServer>("DatabaseServer").getTables();
-        this.vfs = container.resolve<VFS>("VFS");
-        this._keys = this.jsonUtil.deserialize(this.vfs.readFile(`${this.modPath}/db/_keys.json`));
+        this._keys = this.jsonUtil.deserialize(fileSystem.read(`${this.modPath}/db/_keys.json`));
 
         this.loadDatabase(database);
     }
@@ -78,7 +78,8 @@ class BetterKeys implements IPreSptLoadMod, IPostDBLoadMod, IPostSptLoadMod
 
     private load(database: IDatabaseTables, modDb, mapID: string, mapKey: string): void 
     {
-        const keyDb: Keys = this.jsonUtil.deserialize(this.vfs.readFile(`${this.modPath}/db/${mapID}.json`));
+        const fileSystem = this.container.resolve<FileSystemSync>("FileSystemSync");
+        const keyDb: Keys = this.jsonUtil.deserialize(fileSystem.read(`${this.modPath}/db/${mapID}.json`));
 
         for (const keyID in keyDb.Keys) 
         {
@@ -96,7 +97,7 @@ class BetterKeys implements IPreSptLoadMod, IPostDBLoadMod, IPostSptLoadMod
                         database.templates.items[keyID]._props.BackgroundColor = color;
                 }
 
-                const localeData = this.jsonUtil.deserialize(this.vfs.readFile(`${this.modPath}/locale/locale.json`));
+                const localeData = this.jsonUtil.deserialize(fileSystem.read(`${this.modPath}/locale/locale.json`));
 
                 for (const localeID in database.locales.global) 
                 {
